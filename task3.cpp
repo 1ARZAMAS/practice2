@@ -1,83 +1,54 @@
 // 3rd task
 // the extended Euclid algorithm 
 
-// #include <iostream>
-
-// using namespace std;
-
-// int main(){
-
-// }
-
 #include <iostream>
 using namespace std;
 
-void advanced_evclid(int number, int modulo, int& reverse, int& countOfModulo, int& diviner) {
-  int integerPart, remains, reverseOld, reverseNew, countOfModuloOld, countOfModuloNew;
-
-  if (modulo == 0) {     //если берем число по модулю 0
-    diviner = number;    //остаток это само число
-    reverse = 1;         //обратное - 1
-    countOfModulo = 0;   //количество модуля - 0
+void extended_euclid(int num, int mod, int& firstRatio, int& secondRatio, int& result) {/* calculates a * *x + b * *y = gcd(a, b) = *d */
+  long q, r, firstRatio1, firstRatio2, secondRatio1, secondRatio2;
+  if (mod == 0) {
+    mod = num; 
+    firstRatio = 1; 
+    secondRatio = 0;
     return;
   }
-  cout << "reverse" << "\t" << "diviner" << "\t" << "number" << endl;
-  cout << reverse << "\t" << diviner << "\t" << number << endl;
 
-  reverseNew = 1;
-  reverseOld = 0;
-  countOfModuloNew = 0;
-  countOfModuloOld = 1;
+  firstRatio2 = 1, firstRatio1 = 0, secondRatio2 = 0, secondRatio1 = 1;
 
-  while (modulo > 0) {        //идем до того момента, пока можно уменьшать модуль
-    integerPart = number / modulo;      //целый остаток от деления числа на модуль
-    remains = number - integerPart * modulo;  //остаток от деления разность числа и целой части на модуль
-
-    reverse = reverseNew - integerPart * reverseOld;     //вычисляем новое обратное число, вычитая из текущего предыдущее значение на целое
-    countOfModulo = countOfModuloNew - integerPart * countOfModuloOld; //вычисляем новое количество модуля, вычитая из текущего предыдущее значение на целое
-
-    number = modulo;  //перемещаем модуль в число
-    modulo = remains;       //в модуль остаток от деления
-    
-    reverseNew = reverseOld; //предыдущее становится текущим
-    reverseOld = reverse;  // в предыдущее записываем новое
-    countOfModuloNew = countOfModuloOld; //предыдущее становится текущим
-    countOfModuloOld = countOfModulo;  //в предыдущее записываем новое
-    
-    cout << reverseNew << "\t" << number << "\t" << modulo << endl;
+  while (mod > 0) {
+    q = num / mod;
+    r = num - q * mod;
+    firstRatio = firstRatio2 - q * firstRatio1;
+    secondRatio = secondRatio2 - q * secondRatio1;
+    num = mod;
+    mod = r;
+    firstRatio2 = firstRatio1; 
+    firstRatio1 = firstRatio; 
+    secondRatio2 = secondRatio1; 
+    secondRatio1 = secondRatio;
   }
-  diviner = number;  //в делитель записываем то, что осталось от модуля
-  reverse = reverseNew; //в полученное значение записываем предыдущее, так как прошли через 0, а нам нужна 1 
-  countOfModulo = countOfModuloOld;   //количество модулей по такому же принципу
+
+  result = num; 
+  firstRatio = firstRatio2; 
+  secondRatio = secondRatio2;
 }
 
-int inverse(int number, int modulo){
-  int diviner, reverse = 0, countOfModulo = 0;
-  advanced_evclid(number, modulo, reverse, countOfModulo, diviner); //ищем обратное число через функцию
-  
-  if (diviner == 1) {     //если остаток от деления на модуль 1
-    return reverse;       //мы нашли этот остаток
-  } else{
-      return -3;
+int inverse(int num, int mod){/* computes the inverse of a modulo n */
+  int result, firstRatio, secondRatio;
+
+  extended_euclid(num, mod, firstRatio, secondRatio, result);
+  if (result == 1) {
+    return firstRatio;
   }
+  return 0;
 }
 
-void inputReverse(int& number, int& modulo){
-    int reverseNumber = inverse( number, modulo);
-    
-    if (reverseNumber == -3){
-        cout << "There is no inverse number" << endl;  //нет обратного числа
-        cout << "\n";
-    } else {
-        cout << "Reverse from " << number  << " modulo " << modulo << " = " << reverseNumber << endl;
-        cout << "\n";
-    }
-}
-
-int main(){
-  int number = 5, modulo = 7;   //входные данные
-  inputReverse(number, modulo);
-
-  number = 2, modulo = 12;
-  inputReverse(number, modulo);
+ int main(){
+    int num = 7, mod = 11;
+    cout << "Enter the number and the module " << endl;
+    cin >> num >> mod;
+    int reverse;
+    int d = inverse(num, mod);
+    cout << "Inverse number from " << num << " mod "<< mod  << " is " << d << endl;
+    return 0;
 }
