@@ -101,7 +101,7 @@ int main() {
         cout << "Проверим, используя логарифм: " << ost.second << endl;
         zahod = true;
     }
-    if (NOD(basis, modP) == 1 and power == EilerFunc(modP) and zahod == false) { // если числа взаимнопростые, можем воспользоваться теореой Эйлера
+    if (NOD(basis, modP) == 1 && power == EilerFunc(modP)) { // если числа взаимнопростые, можем воспользоваться теореой Эйлера
         zahod = true;
         cout << "Согласно теореме Эйлера получим: " << basis << "^" << power << " mod " << modP << " = 1" << endl;
         pair<int, int> ost = remainder(basis, power, modP);  //рассматриваем остатки через функцию
@@ -112,6 +112,18 @@ int main() {
         int result = modexp(basis, power, modP);
         pair<int, int> ost = remainder(basis, power, modP);  //рассматриваем остатки через функцию
         cout << "Результат, используя свойства сравнений = " << ost.first << " и результат, используя логарифм = " << ost.second << endl;
+    }
+
+    int basis2 = 0, power2 = 0;
+    cout << "Введите основание второго числа, которое будете сравнивать по модулю: ";
+    cin >> basis2;
+    cout << "Введите степень числа второго числа, которое будете сравнивать по модулю: ";
+    cin >> power2;
+
+    if (modexp(basis, power, modP) > modexp(basis2, power2, modP)){
+        cout << basis << "^" << power << " mod " << modP << " > " << basis2 << "^" << power2 << " mod " << modP << endl;
+    } else{
+        cout << basis << "^" << power << " mod " << modP << " < " << basis2 << "^" << power2 << " mod " << modP << endl;
     }
     return 0;
 }
