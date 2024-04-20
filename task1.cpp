@@ -122,8 +122,10 @@ int main() {
 
     if (modexp(basis, power, modP) > modexp(basis2, power2, modP)){
         cout << basis << "^" << power << " mod " << modP << " > " << basis2 << "^" << power2 << " mod " << modP << endl;
-    } else{
+    } else if (modexp(basis, power, modP) < modexp(basis2, power2, modP)){
         cout << basis << "^" << power << " mod " << modP << " < " << basis2 << "^" << power2 << " mod " << modP << endl;
+    } else {
+        cout << basis << "^" << power << " mod " << modP << " = " << basis2 << "^" << power2 << " mod " << modP << endl;
     }
     return 0;
 }
