@@ -21,7 +21,7 @@ bool Prime(int a) {
 	if (a == 1) { //единица - не простое число
 		return false;
 	}
-	for (int i = 2; i < sqrt(a) + 1; i++) { //решето эратосфена
+	for (int i = 2; i < sqrt(a) + 1; i++) {
 		if (a % i == 0) {
 			return false;
 		}
