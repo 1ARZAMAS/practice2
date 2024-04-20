@@ -101,7 +101,7 @@ int main() {
         cout << "Проверим, используя логарифм: " << ost.second << endl;
         zahod = true;
     }
-    if (NOD(basis, modP) == 1 and power == EilerFunc(modP)) { // если числа взаимнопростые, можем воспользоваться теореой Эйлера
+    if (NOD(basis, modP) == 1 and power == EilerFunc(modP) and zahod == false) { // если числа взаимнопростые, можем воспользоваться теореой Эйлера
         zahod = true;
         cout << "Согласно теореме Эйлера получим: " << basis << "^" << power << " mod " << modP << " = 1" << endl;
         pair<int, int> ost = remainder(basis, power, modP);  //рассматриваем остатки через функцию
