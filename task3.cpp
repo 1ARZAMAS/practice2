@@ -4,51 +4,35 @@
 #include <iostream>
 using namespace std;
 
-void extended_euclid(int num, int mod, int& firstRatio, int& secondRatio, int& result) {/* calculates a * *x + b * *y = gcd(a, b) = *d */
-  long q, r, firstRatio1, firstRatio2, secondRatio1, secondRatio2;
-  if (mod == 0) {
-    mod = num; 
-    firstRatio = 1; 
-    secondRatio = 0;
-    return;
+// Функция extendedEuclid находит НОД(a, b) и находит коэффициенты x и y в уравнении ax + by = НОД(a, b)
+int extendedEuclid(int a, int b, int &x, int &y) {
+  if (b == 0) { // Если b равно 0, то x равен 1, y равен 0 и возвращается a
+    x = 1;
+    y = 0;
+    return a;
   }
-
-  firstRatio2 = 1, firstRatio1 = 0, secondRatio2 = 0, secondRatio1 = 1;
-
-  while (mod > 0) {
-    q = num / mod;
-    r = num - q * mod;
-    firstRatio = firstRatio2 - q * firstRatio1;
-    secondRatio = secondRatio2 - q * secondRatio1;
-    num = mod;
-    mod = r;
-    firstRatio2 = firstRatio1; 
-    firstRatio1 = firstRatio; 
-    secondRatio2 = secondRatio1; 
-    secondRatio1 = secondRatio;
-  }
-
-  result = num; 
-  firstRatio = firstRatio2; 
-  secondRatio = secondRatio2;
+  int x1, y1;
+  int d = extendedEuclid(b, a % b, x1, y1); // вызываем рекурсию с аргументами b и a % b
+  // коэффициенты x1 и y1 вычисляются и обновляются новыми значениями x и y
+  x = y1;
+  y = x1 - (a / b) * y1;
+  return d;
 }
 
-int inverse(int num, int mod){/* computes the inverse of a modulo n */
-  int result, firstRatio, secondRatio;
+int main() {
+  system("chcp 65001");
+  int a, m, x, y;
+  cout << "Введите число a: ";
+  cin >> a;
+  cout << "Введите модуль m: ";
+  cin >> m;
 
-  extended_euclid(num, mod, firstRatio, secondRatio, result);
-  if (result == 1) {
-    return firstRatio;
+  int d = extendedEuclid(a, m, x, y);
+  // Если НОД(a, m) не равнен 1, то обратного элемента не существует
+  if (d != 1) {
+    cout << "Обратного элемента не существует" << endl;
+  } else { // Иначе выводим x (взаимообратный элемент по модулю m)
+    cout << "Взаимообратный элемент: " << (x % m + m) % m << endl;
   }
   return 0;
-}
-
- int main(){
-    int num = 7, mod = 11;
-    cout << "Enter the number and the module " << endl;
-    cin >> num >> mod;
-    int reverse;
-    int d = inverse(num, mod);
-    cout << "Inverse number from " << num << " mod "<< mod  << " is " << d << endl;
-    return 0;
 }
