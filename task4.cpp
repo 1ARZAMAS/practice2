@@ -100,7 +100,7 @@ int modInverse(int randE_open, int phi_N) {
     }
 }
 
-long long modPower(long long base, long long exp, long long mod) {
+long long modPower(long long base, long long exp, long long mod) { // возведение в степень по модулю
     long long result = 1;
     while (exp > 0) {
         if (exp % 2 == 1)
@@ -119,41 +119,41 @@ int main(){
     int phi_N = EilerFunc(N); // вычисляем ф(N) с помощью функции Эйлера
     int randE_open = getRandomNumber(min, phi_N); // генерируем случайное число, которое будет меньше ф(N)
     while (NOD(phi_N, randE_open) != 1){ 
-        int randE_open = getRandomNumber(min, phi_N); // если число не взаимно простое с ф(N), то создаем его заново
+        randE_open = getRandomNumber(min, phi_N); // если число не взаимно простое с ф(N), то создаем его заново
     }
 
     int inversedD_closed = modInverse(randE_open, phi_N);
     
-    ifstream file("book.txt");
+    ifstream opentext("eugenii onegin.txt");
     vector<long long> encrypted;
 
     // Чтение и шифрование файла по одному символу
     char c;
-    while (file.get(c)) {
-        long long M = static_cast<long long>(c);
+    while (opentext.get(c)) {
+        long long M = static_cast<long long>(c); // преобразовываем чар в лонг лонг
         if (M > N) {
             cout << "Ошибка: символ вне допустимого диапазона для шифрования" << endl;
             continue;
         }
-        long long C = modPower(M, randE_open, N);
-        encrypted.push_back(C);
+        long long C = modPower(M, randE_open, N); // возводим в степень по модулю
+        encrypted.push_back(C); // и закидываем в вектор
     }
-    file.close();
+    opentext.close();
 
     // Сохранение зашифрованных данных в новый файл
-    ofstream out("encrypted_book.txt");
+    ofstream ciphered("cyphered_text.txt");
     for (auto &C : encrypted) {
-        out << C << " ";
+        ciphered << C << " ";
     }
-    out.close();
+    ciphered.close();
 
-    cout << "Шифрование завершено. Данные сохранены в 'encrypted_book.txt'." << endl;
+    cout << "Шифрование завершено. Данные сохранены в 'cyphered_text.txt'." << endl;
 
     // Открытие зашифрованного файла
-    ifstream file2("encrypted_book.txt");
+    ifstream cipheredtext("cyphered_text.txt");
     stringstream buffer;
-    buffer << file2.rdbuf();  // Чтение файла в буфер
-    file.close();
+    buffer << cipheredtext.rdbuf();  // Чтение файла в буфер
+    cipheredtext.close();
 
     vector<long long> decrypted;
     long long num;
@@ -163,11 +163,11 @@ int main(){
     }
 
     // Запись расшифрованного текста в новый файл
-    ofstream out2("decrypted_book.txt");
+    ofstream decipheredtext("decrypted_book.txt");
     for (auto &M : decrypted) {
-        out2 << static_cast<char>(M);  // Преобразование чисел обратно в символы
+        decipheredtext << static_cast<char>(M);  // Преобразование чисел обратно в символы
     }
-    out2.close();
+    decipheredtext.close();
     cout << "Расшифровка завершена. Данные сохранены в 'decrypted_book.txt'." << endl;
     return 0;
 }
