@@ -28,7 +28,7 @@ Commands stringToCommand(const string& cmd) { // определение кома
     istringstream iss(cmd); // поток ввода для обработки строки команды
     string word;
     iss >> word;
-    if (word == "EXIT") {
+    if (word == "exit") {
         return Commands::EXIT;
     }
     else if (word == "INSERT") {
@@ -92,7 +92,7 @@ int main() {
         }
         cout << "Соединение принято\n";
 
-        thread t([newSocket, &dbManager, &mtx] () { // новый поток для соединения
+        thread t([newSocket, &dbManager, &mtx, &table] () { // новый поток для соединения
             char buffer[1024] = {0}; // буфер 1024 байта, инициализированный 0
             while (true) {
                 int valread = read(newSocket, buffer, 1024); // чтение данных в буфер, valread - количество байт
@@ -111,13 +111,13 @@ int main() {
                         close(newSocket);
                         return; // Возвращаемся из лямбда-функции
                     case Commands::INSERT: // вставка
-                        //QueryManager(command, dbManager);
+                        insert(command, dbManager, table);
                         break;
                     case Commands::DELETE: // удаление
-                        //QueryManager(command, dbManager);
+                        delete1(command, dbManager, table);
                         break;
                     case Commands::SELECT: // выбор
-                        //QueryManager(command, dbManager);
+                        select(command, dbManager, table);
                         break;
                     case Commands::ERR:
                         cerr << "Неизвестная команда.\n";

@@ -84,6 +84,10 @@ void createPrimaryKeyFile(const std::string& tableDir, const std::string& tableN
 
 void createLockFile(const std::string& tableDir, const std::string& tableName);
 
-void QueryManager(const DatabaseManager& dbManager, DBtable& table);
+void select(std::string& command, DatabaseManager& dbManager, DBtable& table);
+
+void delete1(std::string& command, DatabaseManager& dbManager, DBtable& table);
+
+void insert(std::string& command, DatabaseManager& dbManager, DBtable& table);
 
 void createDirectoriesAndFiles(const DatabaseManager& dbManager);
