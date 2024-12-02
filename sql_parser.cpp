@@ -7,7 +7,6 @@ using namespace std;
 namespace fs = std::filesystem;
 
 void select(string& command, DatabaseManager& dbManager, DBtable& table){ 
-    getline(cin, command);
     istringstream iss(command);
     string wordFromQuery;
     iss >> wordFromQuery; // первое слово в команде
@@ -82,7 +81,6 @@ void select(string& command, DatabaseManager& dbManager, DBtable& table){
 }
 
 void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
-    getline(cin, command);
     istringstream iss(command);
     string wordFromQuery;
     iss >> wordFromQuery; // первое слово в команде
@@ -136,7 +134,6 @@ void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
 }
 
 void insert(string& command, DatabaseManager& dbManager, DBtable& table){
-    getline(cin, command);
     istringstream iss(command);
     string wordFromQuery;
     iss >> wordFromQuery; // первое слово в команде
