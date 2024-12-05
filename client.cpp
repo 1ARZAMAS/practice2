@@ -10,7 +10,7 @@ using namespace std;
 int main() {
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0); // создание сокета клиента
     if (clientSocket == -1) {
-        cerr << "Не удалось создать сокет\n";
+        cerr << "Unable to create socket" << endl;
         return 1;
     }
     // определение адреса сервера
@@ -19,31 +19,31 @@ int main() {
     serverAddress.sin_port = htons(7432);
 
     if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) { // преобразует текстовое представление IP-адреса в двоичную форму
-        cerr << "Неправильный адрес\n";
+        cerr << "Incorrect adress" << endl;
         close(clientSocket);
         return 1;
     }
     // соединение с сервером
     if (connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-        cerr << "Соединение не принято\n";
+        cerr << "Connection failed" << endl;
         close(clientSocket);
         return 1;
     }
 
     char buffer[1024] = {0};
     while (true) {
-        cout << "Сообщение для отправки: ";
+        cout << "Enter command: ";
         string text;
         getline(cin, text);
         text += "\n";
         send(clientSocket, text.c_str(), text.length(), 0); // отправляет сообщение на сервер, c_str - указатель на строку
         int valread = read(clientSocket, buffer, 1024); // чтение данных в буфер, valread - количество байт
         if (valread <= 0) {
-            cerr << "Сервер отсоединился\n";
+            cerr << "Server disconnected" << endl;
             break;
         }
 
-        cout << "Сообщение с сервера: " << buffer;
+        cout << "Message from the server: " << buffer;
         memset(buffer, 0, sizeof(buffer)); // очищаем и заполняем буфер нулями
     }
     close(clientSocket);
