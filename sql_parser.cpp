@@ -106,7 +106,9 @@ void select(string& command, DatabaseManager& dbManager, DBtable& table){
 void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
     istringstream iss(command);
     string wordFromQuery;
-    iss >> wordFromQuery; // первое слово в команде
+    if (!(iss >> wordFromQuery)){ // первое слово в команде
+        throw runtime_error("Command is not complete");
+    } 
     try {
         // DELETE FROM таблица1 WHERE таблица1.колонка1 = '123'
         // обрабатываем запрос
@@ -168,10 +170,11 @@ void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
 void insert(string& command, DatabaseManager& dbManager, DBtable& table){
     istringstream iss(command);
     string wordFromQuery;
-    iss >> wordFromQuery; // первое слово в команде
+    if (!(iss >> wordFromQuery)){ // первое слово в команде
+        throw runtime_error("Command is not complete");
+    } 
     try {
         // обрабатываем запрос
-        iss >> wordFromQuery;
         if (!(iss >> wordFromQuery) || wordFromQuery != "INTO") {
             throw std::runtime_error("Incorrect command");
         }
