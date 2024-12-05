@@ -39,7 +39,7 @@ void select(string& command, DatabaseManager& dbManager, DBtable& table){
         }
         int fileCountSecondTable = amountOfCSV(dbManager, tablesFromQuery.head->data);
 
-        if (!(iss >> wordFromQuery) || wordFromQuery != "FROM") {
+        if (!(iss >> wordFromQuery) || cleanString(wordFromQuery) != "FROM") {
             throw runtime_error("Expected 'FROM' keyword");
         }
         // проверка на то, что названия таблиц из table1.column1 будут такими же как и после FROM, те table1
@@ -81,7 +81,7 @@ void select(string& command, DatabaseManager& dbManager, DBtable& table){
         string nextWord;
         iss >> nextWord;
         bool hasWhere = false;
-        if (iss >> nextWord && nextWord == "WHERE"){ // проверим, есть ли следующее слово WHERE
+        if (iss >> nextWord && cleanString(nextWord) == "WHERE"){ // проверим, есть ли следующее слово WHERE
             hasWhere = true;
         }
 
@@ -113,7 +113,7 @@ void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
         // DELETE FROM таблица1 WHERE таблица1.колонка1 = '123'
         // обрабатываем запрос
             
-        if (!(iss >> wordFromQuery) || wordFromQuery != "FROM") {
+        if (!(iss >> wordFromQuery) || cleanString(wordFromQuery) != "FROM") {
             throw std::runtime_error("Incorrect command");
         }
         string tableName;
@@ -128,7 +128,7 @@ void delete1(string& command, DatabaseManager& dbManager, DBtable& table){
             throw std::runtime_error("Table is locked");
         }
 
-        if (!(iss >> wordFromQuery) || wordFromQuery != "WHERE") {
+        if (!(iss >> wordFromQuery) || cleanString(wordFromQuery) != "WHERE") {
             throw runtime_error("Expected 'WHERE' clause");
         }
 
@@ -175,7 +175,7 @@ void insert(string& command, DatabaseManager& dbManager, DBtable& table){
     } 
     try {
         // обрабатываем запрос
-        if (!(iss >> wordFromQuery) || wordFromQuery != "INTO") {
+        if (!(iss >> wordFromQuery) || cleanString(wordFromQuery) != "INTO") {
             throw std::runtime_error("Incorrect command");
         }
         string tableName;
@@ -186,7 +186,7 @@ void insert(string& command, DatabaseManager& dbManager, DBtable& table){
             throw std::runtime_error("Table does not exist");
         }
         
-        if (!(iss >> wordFromQuery) || wordFromQuery != "VALUES") {
+        if (!(iss >> wordFromQuery) || cleanString(wordFromQuery) != "VALUES") {
             throw std::runtime_error("Incorrect command");
         }
         if (isLocked(dbManager, tableName)){
