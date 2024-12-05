@@ -16,35 +16,6 @@ using json = nlohmann::json;
 
 using namespace std;
 
-enum class Commands { // существующие команды
-    EXIT,
-    INSERT,
-    DELETE,
-    SELECT,
-    ERR
-};
-
-Commands stringToCommand(const string& cmd) { // определение команд
-    istringstream iss(cmd); // поток ввода для обработки строки команды
-    string word;
-    iss >> word;
-    if (word == "exit") {
-        return Commands::EXIT;
-    }
-    else if (word == "INSERT") {
-        return Commands::INSERT;
-    }
-    else if (word == "DELETE") {
-        return Commands::DELETE;
-    }
-    else if (word == "SELECT") {
-        return Commands::SELECT;
-    }
-    else {
-        return Commands::ERR;
-    }
-}
-
 int main() {
     mutex mtx;
     DatabaseManager dbManager;
@@ -53,87 +24,73 @@ int main() {
     loadSchema(dbManager, "schema.json");
     createDirectoriesAndFiles(dbManager);
 
-    cout << "Загрузка сервера\n";
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0); // создание сокета для сервера
-    // AF_INET сокет используется для работы с IPv4 - протокол передачи информации внутри сети интернет
-    // SOCK_STREAM - сокет типа TCP
-    // использование протокола по умолчанию для данного типа сокета
+    cout << "Starting server..." << endl;
+    int serverSocket = socket(AF_INET, SOCK_STREAM, 0); // создание сокета для сервера: AF_INET для IPv4, сок для работы с ТСР, 0 по дефолту
     if (serverSocket == -1) {
-        cerr << "Не удалось создать сокет\n";
+        cerr << "Error wile making socket" << endl;
         return 1;
     }
 
-    sockaddr_in serverAddress; // определение адреса сервера, тип данных для хранения адреса сокета
-    serverAddress.sin_family = AF_INET; // семейство адресов IPv4
-    serverAddress.sin_addr.s_addr = INADDR_ANY; // 32 битный IPv4
-    serverAddress.sin_port = htons(7432); // преобразует номер порта 7432 из хостового порядка байтов в сетевой порядок байтов
-    // привязываем сокет к указанному адресу и порту
-    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) { // (struct sockaddr*)&serverAddress - указатель на структуру sockaddr_in
-        cerr << "Связь не удалась\n";
-        close(serverSocket);
-        return 1;
-    }
-    // прослушивание входящих соединений
-    if (listen(serverSocket, 3) < 0) { // 3 максимальное количество соединений в очереди
-        cerr << "Прослушивание не удалось\n";
-        close(serverSocket);
-        return 1;
-    }
-    cout << "Ожидание входящих соединений\n";
+    sockaddr_in serverAddress; // храним адрес сокета
+    serverAddress.sin_family = AF_INET; // указываем на семейство адресов
+    serverAddress.sin_addr.s_addr = INADDR_ANY; // принимаем соединения с любого айпишника
+    serverAddress.sin_port = htons(7432); // порт указываем 7432 по тз
 
-    while (true) { // принятие соединений
+    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) { // если произошла какая-то ошибка во время привязки
+        cerr << "Connection is not successeed" << endl; // сокета к серверу то вернем ошибку
+        close(serverSocket);
+        return 1;
+    }
+
+    if (listen(serverSocket, 4) < 0) { // будем ожидать только 4 подключения, в очереди на подключение может быть только четыре клиента
+        cerr << "Error while listening" << endl;
+        close(serverSocket);
+        return 1;
+    }
+    cout << "Waiting for the connection..." << endl;
+
+    while (true) { 
         sockaddr_in clientAddress;
-        socklen_t clientAddressLength = sizeof(clientAddress); // размер 
-        int newSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // принятие клиента
+        socklen_t clientAddressLength = sizeof(clientAddress);
+        int newSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // ожидаем подключение клиента и создаем для него новый сокет
         if (newSocket < 0) {
-            cerr << "Соединение не принято\n";
-            close(serverSocket);
-            continue;
+            cerr << "Connection is not established" << endl;
+            break;
         }
-        cout << "Соединение принято\n";
+        cout << "Connection established" << endl;
 
-        thread t([newSocket, &dbManager, &mtx, &table] () { // новый поток для соединения
-            char buffer[1024] = {0}; // буфер 1024 байта, инициализированный 0
+        thread([newSocket, &dbManager, &mtx, &table] () { // создаем поток для каждого клиента
+            char buffer[1024] = {0}; 
             while (true) {
-                int valread = read(newSocket, buffer, 1024); // чтение данных в буфер, valread - количество байт
+                int valread = read(newSocket, buffer, 1024); // считываем данные в буфер, если клиент отсоединился, то вернем 0 или отриц значение
                 if (valread <= 0) {
-                    cerr << "Клиент отсоединился\n";
+                    cerr << "Client disconnected" << endl;
+                    close(newSocket);
                     break;
                 }
-                string command; // Преобразуем буфер в строку
-                command = string(buffer, valread);
-                lock_guard<mutex> lock(mtx);
-                this_thread::sleep_for(chrono::seconds(5));
-                cout << "Сообщение получено: " << command; // вывод сообщения клиента
-                Commands cmd = stringToCommand(command); // обработка введённой команды
-                switch (cmd) {
-                    case Commands::EXIT: // выход
+                string command(buffer, valread);
+                {
+                    lock_guard<mutex> lock(mtx);
+                    cout << "Command received: " << command;
+                    if (command.find("exit") != string::npos) {
                         close(newSocket);
-                        return; // Возвращаемся из лямбда-функции
-                    case Commands::INSERT: // вставка
+                        break;
+                    } else if (command.find("INSERT") != string::npos) {
                         insert(command, dbManager, table);
-                        break;
-                    case Commands::DELETE: // удаление
-                        delete1(command, dbManager, table);
-                        break;
-                    case Commands::SELECT: // выбор
+                    } else if (command.find("SELECT") != string::npos) {
                         select(command, dbManager, table);
-                        break;
-                    case Commands::ERR:
-                        cerr << "Неизвестная команда.\n";
-                        break;
+                    } else if (command.find("DELETE") != string::npos) {
+                        delete1(command, dbManager, table);
+                    } else {
+                        cerr << "Unknown command" << endl;
+                    }    
                 }
-
-                send(newSocket, buffer, valread, 0); // отправка преобразованного сообщения обратно клиенту
-                memset(buffer, 0, sizeof(buffer)); // очистка буфера, заполнение его 0
+                send(newSocket, buffer, valread, 0); // отправляем данные обратно клиенту
+                memset(buffer, 0, sizeof(buffer)); // чистим за собой буфер
             }
-            close(newSocket);
-        });
-        t.detach(); // отсоединяет поток, чтобы он работал независимо от основного потока
+        }).detach(); // отсоединяем поток чтобы он сам работал
     }
-    close(serverSocket);
 
-
-
+    close(serverSocket); // завершаем работу сервера
     return 0;
 }
